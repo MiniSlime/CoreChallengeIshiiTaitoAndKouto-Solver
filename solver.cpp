@@ -5,6 +5,7 @@
 using namespace std;
 #define COLFILENAME "hoge.col";
 #define DATFILENAME "fuga.dat";
+#define OUTFILENAME "piyo.out";
 
 vector<unsigned long long> binaly(64, 1);
 
@@ -27,6 +28,15 @@ struct nodes {
             right -= binaly[n-64];
         }
     }
+
+    // n番ノードが1かどうか
+    bool test(int n){
+        if(n<=63){
+            return (left & binaly[n]) != 0;
+        }else{
+            return (right & binaly[n-64]) != 0;
+        }
+    }
 };
 
 nodes start = {0, 0};
@@ -35,6 +45,11 @@ nodes target = {0, 0};
 int number_node;
 int number_edge;
 vector<vector<int>> edges;
+
+struct state{
+    nodes current;
+    vector<nodes> history;
+};
 
 vector<string> split(string str, char c) {
     vector<string> vec;
@@ -94,8 +109,37 @@ void inputFiles() {
     }
 }
 
-void outputAnswer() {
+void outputAnswer(vector<nodes> ans) {
+    string datFileName = DATFILENAME;
+    string outFileName = OUTFILENAME;
+    ifstream dat(datFileName);
+    ofstream out(outFileName);
 
+    if (dat.fail() || out.fail()) {
+        cerr << "Failed to open file." << endl;
+        return;
+    }
+
+    string str;
+    while(getline(dat, str)){
+        out<<str<<endl;
+    }
+
+    if(ans.size() == 0){
+        out<<"a NO"<<endl;
+    }else{
+        out<<"a YES"<<endl;
+        for(int i=0;i<ans.size();i++){
+            out<<"a";
+            nodes now = ans.at(i);
+            for(int j=1;j<=100;j++){
+                if(now.test(j)){
+                    out<<" "<<j;
+                }
+            }
+            out<<endl;
+        }
+    }
 }
 
 void initializeBinaly(){
@@ -107,5 +151,7 @@ void initializeBinaly(){
 int main(void) {
     initializeBinaly();
     inputFiles();
-    
+    vector<nodes> ans = {{124, 4414}, {1441, 141412}};
+    // ans=bfs();
+    outputAnswer(ans);
 }
