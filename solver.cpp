@@ -85,6 +85,8 @@ void inputFiles() {
     string str;
     while (getline(col, str)) {
         vector<string> line = split(str, ' ');
+        if(line.at(0) == "c") continue;
+
         if (line.at(0) == "p") { // ノードとエッジの数を取得
             number_node = stoi(line.at(1));
             number_edge = stoi(line.at(2));
