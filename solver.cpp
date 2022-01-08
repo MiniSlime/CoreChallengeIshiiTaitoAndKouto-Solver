@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <queue>
+#include <set>
 using namespace std;
 #define COLFILENAME "hoge.col";
 #define DATFILENAME "fuga.dat";
@@ -51,6 +52,8 @@ struct state{
     nodes current;
     vector<nodes> history;
 };
+
+set<pair<unsigned long long, unsigned long long>> visited;
 
 vector<string> split(string str, char c) {
     vector<string> vec;
@@ -149,6 +152,10 @@ void initializeBinaly(){
     }
 }
 
+pair<unsigned long long, unsigned long long> toPair(nodes n){
+    return make_pair(n.left, n.right);
+}
+
 vector<nodes> bfs(){
     queue<state> que;
     state s={start, {start}};
@@ -164,21 +171,29 @@ vector<nodes> bfs(){
 
         for(int i=1;i<=number_node;i++){
             if(now.current.test(i)){
-                for(auto a:edges.at(i)){
-                    vector<int> nextNeigh = edges.at(a);
-                    bool flag = true;
-                    for(auto b:nextNeigh){
-                        if(b != i && now.current.test(b) == true){
-                            flag = false;
-                            break;
+                for(int j=1;j<=number_node;j++){
+                    if(!now.current.test(j)){
+                        bool flag = true;
+                        vector<int> nextNeigh = edges.at(j);
+                        for(auto a:nextNeigh){
+                            if(a != i && now.current.test(a)){
+                                flag = false;
+                                break;
+                            }
                         }
-                    }
-                    if(flag){
-                        state next = now;
-                        next.current.erase(i);
-                        next.current.set(a);
-                        next.history.push_back(next.current);
-                        que.push(next);
+
+                        if(flag){
+                            state next = now;
+                            next.current.erase(i);
+                            next.current.set(j);
+                            next.history.push_back(next.current);
+
+                            int bef = visited.size();
+                            visited.insert(toPair(next.current));
+                            if(visited.size() > bef){
+                                que.push(next);
+                            }
+                        }
                     }
                 }
             }
