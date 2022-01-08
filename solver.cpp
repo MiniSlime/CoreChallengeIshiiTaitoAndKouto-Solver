@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <queue>
 using namespace std;
 #define COLFILENAME "hoge.col";
 #define DATFILENAME "fuga.dat";
@@ -148,10 +149,49 @@ void initializeBinaly(){
     }
 }
 
+vector<nodes> bfs(){
+    queue<state> que;
+    state s={start, {start}};
+    que.push(s);
+
+    while(!que.empty()){
+        state now = que.front();
+        que.pop();
+
+        if(now.current.left == target.left && now.current.right == target.right){ 
+            return now.history;
+        }
+
+        for(int i=1;i<=number_node;i++){
+            if(now.current.test(i)){
+                for(auto a:edges.at(i)){
+                    vector<int> nextNeigh = edges.at(a);
+                    bool flag = true;
+                    for(auto b:nextNeigh){
+                        if(b != i && now.current.test(b) == true){
+                            flag = false;
+                            break;
+                        }
+                    }
+                    if(flag){
+                        state next = now;
+                        next.current.erase(i);
+                        next.current.set(a);
+                        next.history.push_back(next.current);
+                        que.push(next);
+                    }
+                }
+            }
+        }
+    }
+
+    return {};
+}
+
 int main(void) {
     initializeBinaly();
     inputFiles();
     vector<nodes> ans = {{124, 4414}, {1441, 141412}};
-    // ans=bfs();
+    ans=bfs();
     outputAnswer(ans);
 }
