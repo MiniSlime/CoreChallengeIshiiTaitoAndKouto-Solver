@@ -8,7 +8,7 @@ using namespace std;
 #define COLFILENAME "hoge.col";
 #define DATFILENAME "fuga.dat";
 #define OUTFILENAME "piyo.out";
-#define ALGOMODE 0;
+#define ALGOMODE 1;
 
 vector<unsigned long long> binaly(64, 1);
 
@@ -108,10 +108,12 @@ void inputFiles() {
         vector<string> line = split(str, ' ');
         if(line.at(0) == "s"){
             for(int i=1; i<line.size(); i++){
+                if(line.at(i) == "") continue;
                 start.set(stoi(line.at(i)));
             }
         }else if(line.at(0) == "t"){
             for(int i=1; i<line.size(); i++){
+                if(line.at(i) == "") continue;
                 target.set(stoi(line.at(i)));
             }
         }
@@ -204,10 +206,98 @@ vector<nodes> bfs(){
     return {};
 }
 
+struct astarState{
+    long long int cost;
+    state stat;
+
+    bool operator==(const astarState& a) const{
+        return (cost==a.cost);
+    }
+    bool operator<(const astarState& a) const{
+        return (cost<a.cost);
+    }
+    bool operator>(const astarState& a) const{
+        return (cost>a.cost);
+    }
+};
+
+int distForAstar(nodes a, nodes b){
+    int ret=0;
+    for(int i=0;i<=number_node;i++){
+        if(a.nodes_info.at(i)==b.nodes_info.at(i)) ret++;
+    }
+    return ret;
+}
+
+vector<nodes> astar(){
+    priority_queue<astarState,vector<astarState>,greater<astarState>> que;
+    que.push({0,{start,{start}}});
+    visited.insert(start.nodes_info);
+    astarState now,tmp;
+    while(!que.empty()){
+        now=que.top();
+        que.pop();
+
+        if(now.stat.current.nodes_info==target.nodes_info){
+            return now.stat.history;
+        }
+
+        for(int i=1;i<=number_node;i++){ //iをjに移動させる(i==1でj==0)
+            if(!now.stat.current.test(i)) continue;
+            for(int j=1;j<=number_node;j++){
+                if(i==j) continue;
+                if(now.stat.current.test(j)) continue;
+                int bef=visited.size();
+                tmp=now;
+                tmp.stat.current.set(j);
+                tmp.stat.current.erase(i);
+                visited.insert(tmp.stat.current.nodes_info);
+                if(bef==visited.size()) continue;
+                bool rst=0;
+                for(int k=0;k<edges.at(j).size();k++){
+                    if(tmp.stat.current.test(edges.at(j).at(k))){
+                        rst=1;
+                        break;
+                    }
+                }
+                if(rst) continue;
+
+                tmp.cost=now.cost+1 + distForAstar(tmp.stat.current,target);
+                tmp.stat.history.push_back(tmp.stat.current);
+
+                /*for(int i=0;i<tmp.stat.current.nodes_info.size();i++){
+                    if(tmp.stat.current.nodes_info.at(i)) {
+                        cout<<i<<" ";
+                    }
+                }
+                cout<<endl;*/
+
+                que.push(tmp);
+            }
+        }
+    }
+
+    return {};
+}
+
 int main(void) {
     initializeBinaly();
     inputFiles();
     vector<nodes> ans = {{}, {}};
-    ans=bfs();
+    int algomode=ALGOMODE;
+    switch (algomode)
+    {
+    case 0:
+        ans=bfs();
+        break;
+    
+    case 1:
+        ans=astar();
+        break;
+
+    default:
+        ans=bfs();
+        break;
+    }
     outputAnswer(ans);
 }
