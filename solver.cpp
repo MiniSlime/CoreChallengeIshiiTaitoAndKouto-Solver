@@ -8,6 +8,7 @@ using namespace std;
 #define COLFILENAME "hoge.col";
 #define DATFILENAME "fuga.dat";
 #define OUTFILENAME "piyo.out";
+#define ALGOMODE 0;
 
 vector<unsigned long long> binaly(64, 1);
 
