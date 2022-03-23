@@ -12,37 +12,39 @@ using namespace std;
 vector<unsigned long long> binaly(64, 1);
 
 struct nodes {
-    unsigned long long left;
-    unsigned long long right; // leftの0ビット目が0、rightの63ビット目が127番ノード(ただし、実際に使用するのは1番ノードから100番ノードまで)
+    vector<bool> nodes_info;
 
     void set(int n){
-        if(n<=63){
-            left += binaly[n];
-        }else{
-            right += binaly[n-64];
-        }
+        // if(n<=63){
+        //     left += binaly[n];
+        // }else{
+        //     right += binaly[n-64];
+        // }
+        nodes_info.at(n) = 1;
     }
 
     void erase(int n){
-        if(n<=63){
-            left -= binaly[n];
-        }else{
-            right -= binaly[n-64];
-        }
+        // if(n<=63){
+        //     left -= binaly[n];
+        // }else{
+        //     right -= binaly[n-64];
+        // }
+        nodes_info.at(n) = 0;
     }
 
     // n番ノードが1かどうか
     bool test(int n){
-        if(n<=63){
-            return (left & binaly[n]) != 0;
-        }else{
-            return (right & binaly[n-64]) != 0;
-        }
+        // if(n<=63){
+        //     return (left & binaly[n]) != 0;
+        // }else{
+        //     return (right & binaly[n-64]) != 0;
+        // }
+        return nodes_info.at(n);
     }
 };
 
-nodes start = {0, 0};
-nodes target = {0, 0};
+nodes start = {vector<bool>(10000,0)};
+nodes target = {vector<bool>(10000,0)};
 
 int number_node;
 int number_edge;
@@ -53,7 +55,7 @@ struct state{
     vector<nodes> history;
 };
 
-set<pair<unsigned long long, unsigned long long>> visited;
+set<vector<bool>> visited;
 
 vector<string> split(string str, char c) {
     vector<string> vec;
@@ -154,10 +156,6 @@ void initializeBinaly(){
     }
 }
 
-pair<unsigned long long, unsigned long long> toPair(nodes n){
-    return make_pair(n.left, n.right);
-}
-
 vector<nodes> bfs(){
     queue<state> que;
     state s={start, {start}};
@@ -167,7 +165,7 @@ vector<nodes> bfs(){
         state now = que.front();
         que.pop();
 
-        if(now.current.left == target.left && now.current.right == target.right){ 
+        if(now.current.nodes_info == target.nodes_info) {
             return now.history;
         }
 
@@ -191,7 +189,7 @@ vector<nodes> bfs(){
                             next.history.push_back(next.current);
 
                             int bef = visited.size();
-                            visited.insert(toPair(next.current));
+                            visited.insert(next.current.nodes_info);
                             if(visited.size() > bef){
                                 que.push(next);
                             }
@@ -208,7 +206,7 @@ vector<nodes> bfs(){
 int main(void) {
     initializeBinaly();
     inputFiles();
-    vector<nodes> ans = {{124, 4414}, {1441, 141412}};
+    vector<nodes> ans = {{}, {}};
     ans=bfs();
     outputAnswer(ans);
 }
