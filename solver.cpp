@@ -5,6 +5,7 @@
 #include <queue>
 #include <set>
 #include <chrono>
+#include <stack>
 using namespace std;
 #define COLFILENAME "hoge.col";
 #define DATFILENAME "fuga.dat";
@@ -282,6 +283,55 @@ vector<nodes> astar(){
     return {};
 }
 
+vector<nodes> rDFS_search(state current, int dist, int limit){
+    if(current.current.nodes_info == target.nodes_info) return current.history;
+    if(dist >= limit) return {};
+
+    for(int i=1;i<=number_node;i++){
+            if(current.current.test(i)){
+                for(int j=1;j<=number_node;j++){
+                    if(!current.current.test(j)){
+                        bool flag = true;
+                        vector<int> nextNeigh = edges.at(j);
+                        for(auto a:nextNeigh){
+                            if(a != i && current.current.test(a)){
+                                flag = false;
+                                break;
+                            }
+                        }
+
+                        if(flag){
+                            state next = current;
+                            next.current.erase(i);
+                            next.current.set(j);
+                            next.history.push_back(next.current);
+
+                            int bef = visited.size();
+                            visited.insert(next.current.nodes_info);
+                            if(visited.size() > bef){
+                                vector<nodes> r = rDFS_search(next, dist+1, limit);
+                                if(r.size() > 0) return r;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+}
+
+vector<nodes> rDFS(){
+    for(int i=1;i<=number_node;i++){
+        visited.clear();
+        state s={start, {start}};
+        vector<nodes> ret = rDFS_search(s,1,i);
+        if(ret.size()>0){
+            return ret;
+        }
+    }
+
+    return {};
+}
+
 int main(void) {
     initializeBinaly();
     inputFiles();
@@ -298,6 +348,10 @@ int main(void) {
     
     case 1:
         ans=astar();
+        break;
+
+    case 2:
+        ans=rDFS();
         break;
 
     default:
