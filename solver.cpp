@@ -4,11 +4,13 @@
 #include <vector>
 #include <queue>
 #include <set>
+#include <chrono>
 using namespace std;
 #define COLFILENAME "hoge.col";
 #define DATFILENAME "fuga.dat";
 #define OUTFILENAME "piyo.out";
 #define ALGOMODE 1;
+#define TIMER 1;
 
 vector<unsigned long long> binaly(64, 1);
 
@@ -224,7 +226,7 @@ struct astarState{
 int distForAstar(nodes a, nodes b){
     int ret=0;
     for(int i=0;i<=number_node;i++){
-        if(a.nodes_info.at(i)==b.nodes_info.at(i)) ret++;
+        if(a.nodes_info.at(i)!=b.nodes_info.at(i)) ret++;
     }
     return ret;
 }
@@ -262,7 +264,7 @@ vector<nodes> astar(){
                 }
                 if(rst) continue;
 
-                tmp.cost=now.cost+1 + distForAstar(tmp.stat.current,target);
+                tmp.cost=now.stat.history.size()+1 + distForAstar(tmp.stat.current,target);
                 tmp.stat.history.push_back(tmp.stat.current);
 
                 /*for(int i=0;i<tmp.stat.current.nodes_info.size();i++){
@@ -285,6 +287,9 @@ int main(void) {
     inputFiles();
     vector<nodes> ans = {{}, {}};
     int algomode=ALGOMODE;
+    int timer=TIMER;
+    clock_t startTime,endTime;
+    if(timer) startTime=clock();
     switch (algomode)
     {
     case 0:
@@ -298,6 +303,11 @@ int main(void) {
     default:
         ans=bfs();
         break;
+    }
+    if(timer){
+        endTime=clock();
+        float time=((float)endTime-startTime)/CLOCKS_PER_SEC;
+        cout<<time<<" sec"<<endl;
     }
     outputAnswer(ans);
 }
